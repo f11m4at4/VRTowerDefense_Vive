@@ -1,9 +1,13 @@
-﻿#define PC
+﻿//#define PC
 //#define Oculus
-//#define Vive
+#define Vive
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if Vive
+using Valve.VR;
+#endif
+
 public static class ARAVRInput
 {
 #if PC
@@ -37,6 +41,12 @@ public static class ARAVRInput
         Thumbstick = OVRInput.Button.PrimaryThumbstick,
         IndexTrigger = OVRInput.Button.PrimaryIndexTrigger,
         HandTrigger = OVRInput.Button.PrimaryHandTrigger
+#elif Vive
+        One = 0,
+        Two = 0,
+        Thumbstick = 0,
+        IndexTrigger = 0,
+        HandTrigger = 0,
 #endif
     }
 
@@ -48,6 +58,8 @@ public static class ARAVRInput
 #elif Oculus
         LTouch = OVRInput.Controller.LTouch,
         RTouch = OVRInput.Controller.RTouch
+#elif Vive
+
 #endif
     }
 
@@ -58,6 +70,16 @@ public static class ARAVRInput
         {
             rootTransform = GameObject.Find("TrackingSpace").transform;
         }
+
+        return rootTransform;
+    }
+#elif Vive
+    static Transform GetTransform()
+    {
+        if (rootTransform == null)
+        {
+            rootTransform = GameObject.Find("[CameraRig]").transform;
+        } 
 
         return rootTransform;
     }
@@ -87,7 +109,11 @@ public static class ARAVRInput
 #elif Oculus
             Vector3 pos = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
             pos = GetTransform().TransformPoint(pos);
-            return pos;                
+            return pos;   
+#elif Vive
+            SteamVR_Behaviour_Pose controllerPose = RHand.GetComponent<SteamVR_Behaviour_Pose>();
+            Vector3 pos = controllerPose.transform.position;
+            return pos;
 #endif
         }
     }
@@ -101,6 +127,11 @@ public static class ARAVRInput
             return direction;
 #elif Oculus
             Vector3 direction = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch) * Vector3.forward;
+            direction = GetTransform().TransformDirection(direction);
+            return direction;
+#elif Vive
+            SteamVR_Behaviour_Pose controllerPose = RHand.GetComponent<SteamVR_Behaviour_Pose>();
+            Vector3 direction = controllerPose.GetVelocity();
             direction = GetTransform().TransformDirection(direction);
             return direction;
 #endif
@@ -128,7 +159,11 @@ public static class ARAVRInput
 #elif Oculus
             Vector3 pos = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
             pos = GetTransform().TransformPoint(pos);
-            return pos;                
+            return pos;   
+#elif Vive
+            SteamVR_Behaviour_Pose controllerPose = RHand.GetComponent<SteamVR_Behaviour_Pose>();
+            Vector3 pos = controllerPose.transform.position;
+            return pos;
 #endif
         }
     }
@@ -142,6 +177,11 @@ public static class ARAVRInput
             return direction;
 #elif Oculus
             Vector3 direction = OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch) * Vector3.forward;
+            direction = GetTransform().TransformDirection(direction);
+            return direction;
+#elif Vive
+            SteamVR_Behaviour_Pose controllerPose = LHand.GetComponent<SteamVR_Behaviour_Pose>();
+            Vector3 direction = controllerPose.GetVelocity();
             direction = GetTransform().TransformDirection(direction);
             return direction;
 #endif
@@ -175,6 +215,15 @@ public static class ARAVRInput
             }
             return lHand;
         }
+#elif Vive
+        get
+        {
+            if (lHand == null)
+            {
+                lHand = GameObject.Find("Controller (left)").transform;
+            }
+            return lHand;
+        }
 #endif
 
     }
@@ -201,6 +250,15 @@ public static class ARAVRInput
             if (rHand == null)
             {
                 rHand = GameObject.Find("RightControllerAnchor").transform;
+            }
+            return rHand;
+        }
+#elif Vive
+        get
+        {
+            if (rHand == null)
+            {
+                rHand = GameObject.Find("Controller (right)").transform;
             }
             return rHand;
         }
