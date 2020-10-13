@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 #if Vive
 using Valve.VR;
+using Valve.VR.Extras;
 #endif
 
 public static class ARAVRInput
@@ -19,22 +20,29 @@ public static class ARAVRInput
 #endif
 
 #if PC
-    public enum ButtonPC
+    public enum ButtonTarget
     {
         Fire1,
         Fire2,
         Fire3,
+    }
+#elif Vive
+    public enum ButtonTarget
+    {
+        Teleport,
+        InteractUI,
+        GrabGrib,
     }
 #endif
 
     public enum Button
     {
 #if PC
-        One = ButtonPC.Fire1,
-        Two = ButtonPC.Fire2,
-        Thumbstick = ButtonPC.Fire1,
-        IndexTrigger = ButtonPC.Fire3,
-        HandTrigger = ButtonPC.Fire2
+        One = ButtonTarget.Fire1,
+        Two = ButtonTarget.Fire2,
+        Thumbstick = ButtonTarget.Fire1,
+        IndexTrigger = ButtonTarget.Fire3,
+        HandTrigger = ButtonTarget.Fire2
 #elif Oculus
         One = OVRInput.Button.One,
         Two = OVRInput.Button.Two,
@@ -42,11 +50,11 @@ public static class ARAVRInput
         IndexTrigger = OVRInput.Button.PrimaryIndexTrigger,
         HandTrigger = OVRInput.Button.PrimaryHandTrigger
 #elif Vive
-        One = 0,
-        Two = 0,
-        Thumbstick = 0,
-        IndexTrigger = 0,
-        HandTrigger = 0,
+        One = ButtonTarget.Teleport,
+        Two = ButtonTarget.InteractUI,
+        Thumbstick = ButtonTarget.Teleport,
+        IndexTrigger = ButtonTarget.InteractUI,
+        HandTrigger = ButtonTarget.GrabGrib,
 #endif
     }
 
@@ -59,7 +67,8 @@ public static class ARAVRInput
         LTouch = OVRInput.Controller.LTouch,
         RTouch = OVRInput.Controller.RTouch
 #elif Vive
-
+        LTouch = SteamVR_Input_Sources.LeftHand,
+        RTouch = SteamVR_Input_Sources.RightHand,
 #endif
     }
 
@@ -269,28 +278,35 @@ public static class ARAVRInput
     public static bool Get(Button virtualMask, Controller hand = Controller.RTouch)
     {
 #if PC
-        return Input.GetButton(((ButtonPC)virtualMask).ToString());
+        return Input.GetButton(((ButtonTarget)virtualMask).ToString());
 #elif Oculus
         return OVRInput.Get((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
+#elif Vive
+        return SteamVR_Actions._default.Teleport.state;
 #endif
     }
 
     public static bool GetDown(Button virtualMask, Controller hand = Controller.RTouch)
     {
 #if PC
-        //Debug.Log("button : " + ((ButtonPC)virtualMask).ToString());
-        return Input.GetButtonDown(((ButtonPC)virtualMask).ToString());
+        //Debug.Log("button : " + ((ButtonTarget)virtualMask).ToString());
+        return Input.GetButtonDown(((ButtonTarget)virtualMask).ToString());
 #elif Oculus
         return OVRInput.GetDown((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
+#elif Vive
+        return SteamVR_Actions._default.Teleport.stateDown;
+        //return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)hand);
 #endif
     }
 
     public static bool GetUp(Button virtualMask, Controller hand = Controller.RTouch)
     {
 #if PC
-        return Input.GetButtonUp(((ButtonPC)virtualMask).ToString());
+        return Input.GetButtonUp(((ButtonTarget)virtualMask).ToString());
 #elif Oculus
         return OVRInput.GetUp((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
+#elif Vive
+        return SteamVR_Actions._default.Teleport.stateUp;
 #endif
     }
 
