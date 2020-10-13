@@ -31,7 +31,7 @@ public static class ARAVRInput
     {
         Teleport,
         InteractUI,
-        GrabGrib,
+        GrabGrip,
     }
 #endif
 
@@ -54,7 +54,7 @@ public static class ARAVRInput
         Two = ButtonTarget.InteractUI,
         Thumbstick = ButtonTarget.Teleport,
         IndexTrigger = ButtonTarget.InteractUI,
-        HandTrigger = ButtonTarget.GrabGrib,
+        HandTrigger = ButtonTarget.GrabGrip,
 #endif
     }
 
@@ -282,7 +282,8 @@ public static class ARAVRInput
 #elif Oculus
         return OVRInput.Get((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
 #elif Vive
-        return SteamVR_Actions._default.Teleport.state;
+        //return SteamVR_Actions._default.Teleport.state;
+        return SteamVR_Input.GetState(((ButtonTarget)virtualMask).ToString(), RHand.GetComponent<SteamVR_Behaviour_Pose>().inputSource);
 #endif
     }
 
@@ -294,8 +295,9 @@ public static class ARAVRInput
 #elif Oculus
         return OVRInput.GetDown((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
 #elif Vive
-        return SteamVR_Actions._default.Teleport.stateDown;
+        //return SteamVR_Actions._default.Teleport.stateDown;
         //return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)hand);
+        return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), RHand.GetComponent<SteamVR_Behaviour_Pose>().inputSource);
 #endif
     }
 
@@ -306,7 +308,8 @@ public static class ARAVRInput
 #elif Oculus
         return OVRInput.GetUp((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
 #elif Vive
-        return SteamVR_Actions._default.Teleport.stateUp;
+        //return SteamVR_Actions._default.Teleport.stateUp;
+        return SteamVR_Input.GetStateUp(((ButtonTarget)virtualMask).ToString(), RHand.GetComponent<SteamVR_Behaviour_Pose>().inputSource);
 #endif
     }
 
