@@ -32,8 +32,11 @@ public class PlayerMove : MonoBehaviour
     {
         // 사용자의 입력에 따라 앞뒤좌우로 이동하고 싶다.
         // 1. 사용자의 입력을 받는다.
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        //float h = Input.GetAxis("Horizontal");
+        //float v = Input.GetAxis("Vertical");
+        float h = ARAVRInput.GetAxis("Horizontal");
+        float v = ARAVRInput.GetAxis("Vertical");
+
         // 2. 방향을 만든다.
         Vector3 dir = new Vector3(h, 0, v);
 

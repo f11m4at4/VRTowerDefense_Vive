@@ -79,9 +79,11 @@ public class GrabObject : MonoBehaviour
                 // 물리기능 정지
                 grabbedObject.GetComponent<Rigidbody>().isKinematic = true;
                 // 초기 위치값 지정
-                prevPos = ARAVRInput.RHand.position;
+                prevPos = ARAVRInput.RHandPosition;
                 // 초기 회전 값 지정
                 prevRot = ARAVRInput.RHand.rotation;
+                
+
             }
         }
     }
@@ -89,9 +91,9 @@ public class GrabObject : MonoBehaviour
     private void TryUngrab()
     {
         // 던질 방향
-        Vector3 throwDirection = (ARAVRInput.RHand.position - prevPos);
+        Vector3 throwDirection = (ARAVRInput.RHandPosition - prevPos);
         // 위치 기억
-        prevPos = ARAVRInput.RHand.position;
+        prevPos = ARAVRInput.RHandPosition;
 
         // 쿼터니온 공식
         // angle1 = Q1, angle2 = Q2
