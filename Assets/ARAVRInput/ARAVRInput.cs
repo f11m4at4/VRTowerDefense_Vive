@@ -51,7 +51,7 @@ public static class ARAVRInput
         IndexTrigger = OVRInput.Button.PrimaryIndexTrigger,
         HandTrigger = OVRInput.Button.PrimaryHandTrigger
 #elif Vive
-        One = ButtonTarget.Teleport,
+        One = ButtonTarget.InteractUI,
         Two = ButtonTarget.Jump,
         Thumbstick = ButtonTarget.Teleport,
         IndexTrigger = ButtonTarget.InteractUI,
@@ -270,17 +270,6 @@ public static class ARAVRInput
 
     }
 
-    public static SteamVR_Input_Sources GetInputSource(Controller hand)
-    {
-        if (hand == Controller.LTouch)
-        {
-            return LHand.GetComponent<SteamVR_Behaviour_Pose>().inputSource;
-        }
-        else
-        {
-            return RHand.GetComponent<SteamVR_Behaviour_Pose>().inputSource;
-        }
-    }
 
     public static bool Get(Button virtualMask, Controller hand = Controller.RTouch)
     {
@@ -290,7 +279,7 @@ public static class ARAVRInput
         return OVRInput.Get((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
 #elif Vive
         //return SteamVR_Actions._default.Teleport.state;
-        return SteamVR_Input.GetState(((ButtonTarget)virtualMask).ToString(), GetInputSource(hand));
+        return SteamVR_Input.GetState(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)(hand));
 #endif
     }
 
@@ -304,7 +293,7 @@ public static class ARAVRInput
 #elif Vive
         //return SteamVR_Actions._default.Teleport.stateDown;
         //return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)hand);
-        return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), GetInputSource(hand));
+        return SteamVR_Input.GetStateDown(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)(hand));
 #endif
     }
 
@@ -316,7 +305,7 @@ public static class ARAVRInput
         return OVRInput.GetUp((OVRInput.Button)virtualMask, (OVRInput.Controller)hand);
 #elif Vive
         //return SteamVR_Actions._default.Teleport.stateUp;
-        return SteamVR_Input.GetStateUp(((ButtonTarget)virtualMask).ToString(), GetInputSource(hand));
+        return SteamVR_Input.GetStateUp(((ButtonTarget)virtualMask).ToString(), (SteamVR_Input_Sources)(hand));
 #endif
     }
 
@@ -330,11 +319,11 @@ public static class ARAVRInput
 #elif Vive
         if (axis == "Horizontal")
         {
-            return SteamVR_Input.GetVector2("TouchPad", GetInputSource(Controller.LTouch)).x;
+            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(Controller.LTouch)).x;
         }
         else
         {
-            return SteamVR_Input.GetVector2("TouchPad", GetInputSource(Controller.LTouch)).y;
+            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(Controller.LTouch)).y;
         }
 #endif
     }

@@ -29,12 +29,7 @@ public class Gun : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(ARAVRInput.RHandPosition, 1);
-        Gizmos.DrawLine(ARAVRInput.RHandPosition, ARAVRInput.RHandDirection * 100);
-    }
+    
     void Update()
     {
         // 크로스헤어 표시
