@@ -70,7 +70,7 @@ public class GrabObject : MonoBehaviour
     {
         // Grab 버튼을 누르면 일정영역안에 있는 폭탄을 잡는다.
         // 1. grab 버튼을 눌렀다면
-        if (ARAVRInput.GetDown(ARAVRInput.Button.HandTrigger, ARAVRInput.Controller.Any))
+        if (ARAVRInput.GetDown(ARAVRInput.Button.HandTrigger, ARAVRInput.Controller.RTouch))
         {
             int closest = 0;
 
