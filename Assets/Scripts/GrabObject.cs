@@ -38,17 +38,63 @@ public class GrabObject : MonoBehaviour
             TryUngrab();
         }
     }
+
+    // 원거리에서 물체 잡는 기능 활성화 여부
+    public bool isRemoteGrab = false;
+    // 원거리에서 물체 잡을 수 있는 거리
+    public float remoteGrabDistance = 20;
+
+    IEnumerator GrabbingAnimation()
+    {
+        // 물리기능 정지
+        grabbedObject.GetComponent<Rigidbody>().isKinematic = true;
+        // 초기 위치값 지정
+        prevPos = ARAVRInput.RHandPosition;
+        // 초기 회전 값 지정
+        prevRot = ARAVRInput.RHand.rotation;
+        Vector3 startLocation = grabbedObject.transform.position;
+        Vector3 targetLocation = ARAVRInput.RHandPosition + ARAVRInput.RHandDirection * 0.1f;
+        float currentTime = 0;
+        float finishTime = 0.2f;
+        while(currentTime / finishTime < 1)
+        {
+            currentTime += Time.deltaTime;
+            grabbedObject.transform.position = Vector3.Lerp(startLocation, targetLocation, currentTime / finishTime);
+            yield return null;
+        }
+        // 잡은 물체를 손의 자식으로 등록
+        grabbedObject.transform.position = targetLocation;// + ARAVRInput.RHandDirection * 0.05f;
+        grabbedObject.transform.parent = ARAVRInput.RHand;
+    }
     private void TryGrab()
     {
         // Grab 버튼을 누르면 일정영역안에 있는 폭탄을 잡는다.
         // 1. grab 버튼을 눌렀다면
-        if (ARAVRInput.GetDown(ARAVRInput.Button.HandTrigger, ARAVRInput.Controller.RTouch))
+        if (ARAVRInput.GetDown(ARAVRInput.Button.HandTrigger, ARAVRInput.Controller.Any))
         {
             int closest = 0;
 
             // 2. 일정영역 안에 폭탄이 있으니까
             // - 영역안에 있는 모든 폭탄 검출
-            Collider[] hitObjects = Physics.OverlapSphere(ARAVRInput.RHandPosition, grabRange, grabbedLayer);
+            Collider[] hitObjects = null;
+            if (isRemoteGrab == false)
+            {
+                hitObjects = Physics.OverlapSphere(ARAVRInput.RHandPosition, grabRange, grabbedLayer);
+            }
+            else
+            {
+                Ray ray = new Ray(ARAVRInput.RHandPosition, ARAVRInput.RHandDirection);
+                RaycastHit hitInfo;
+                if(Physics.SphereCast(ray, 0.5f, out hitInfo, remoteGrabDistance, grabbedLayer))
+                {
+                    // 잡은 상태로 전환
+                    isGrabbing = true;
+                    // 잡은 물체기억
+                    grabbedObject = hitInfo.transform.gameObject;
+                    StartCoroutine(GrabbingAnimation());
+                }
+                return;
+            }
             // - 손과 가장 가까운 물체 선택
             for (int i = 1; i < hitObjects.Length; i++)
             {

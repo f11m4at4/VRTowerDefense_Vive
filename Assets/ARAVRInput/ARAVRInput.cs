@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 #if Vive
 using Valve.VR;
 using Valve.VR.Extras;
@@ -70,8 +71,10 @@ public static class ARAVRInput
 #elif Vive
         LTouch = SteamVR_Input_Sources.LeftHand,
         RTouch = SteamVR_Input_Sources.RightHand,
+        Any = SteamVR_Input_Sources.Any,
 #endif
     }
+
 
 #if Oculus
     static Transform GetTransform()
@@ -89,7 +92,7 @@ public static class ARAVRInput
         if (rootTransform == null)
         {
             rootTransform = GameObject.Find("[CameraRig]").transform;
-        } 
+        }
 
         return rootTransform;
     }
@@ -119,7 +122,7 @@ public static class ARAVRInput
 #elif Oculus
             Vector3 pos = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
             pos = GetTransform().TransformPoint(pos);
-            return pos;   
+            return pos;
 #elif Vive
             Vector3 pos = RHand.position;
             return pos;
@@ -166,7 +169,7 @@ public static class ARAVRInput
 #elif Oculus
             Vector3 pos = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
             pos = GetTransform().TransformPoint(pos);
-            return pos;   
+            return pos;
 #elif Vive
             Vector3 pos = LHand.position;
             return pos;
@@ -310,20 +313,27 @@ public static class ARAVRInput
     }
 
 
-    public static float GetAxis(string axis)
+    public static float GetAxis(string axis, Controller hand = Controller.LTouch)
     {
 #if PC
         return Input.GetAxis(axis);
 #elif Oculus
-
-#elif Vive
         if (axis == "Horizontal")
         {
-            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(Controller.LTouch)).x;
+            return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, (OVRInput.Controller)hand).x;
         }
         else
         {
-            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(Controller.LTouch)).y;
+            return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, (OVRInput.Controller)hand).y;
+        }
+#elif Vive
+        if (axis == "Horizontal")
+        {
+            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(hand)).x;
+        }
+        else
+        {
+            return SteamVR_Input.GetVector2("TouchPad", (SteamVR_Input_Sources)(hand)).y;
         }
 #endif
     }
@@ -335,7 +345,7 @@ public static class ARAVRInput
 #endif
     public static void DrawCrosshair(Transform crosshair, bool isHand = true, Controller hand = Controller.RTouch)
     {
-        if(crosshair == null)
+        if (crosshair == null)
         {
             return;
         }
@@ -347,7 +357,7 @@ public static class ARAVRInput
 #if PC
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 #else
-            if(hand == Controller.RTouch)
+            if (hand == Controller.RTouch)
             {
                 ray = new Ray(RHandPosition, RHandDirection);
             }
@@ -383,29 +393,78 @@ public static class ARAVRInput
     }
 
     // 진동 호출 하기
-    static AudioClip vibrationClip = null;
     public static void PlayVibration(Controller hand)
     {
 #if PC
 
 #elif Oculus
-
+        PlayVibration(0.06f, 1, 1, 1, hand);
 #elif Vive
-        PlayVibration(1, 150, 75, hand);
+        PlayVibration(0, 0.06f, 160, 0.5f, hand);
 #endif
     }
 
     // 진동호출하기
-    // duration : 반복횟수, frequency : 지속시간, amplify : 진동크기, hand : 왼쪽 혹은 오른쪽 컨트롤러
-    public static void PlayVibration(int duration, int frequency, int amplitude, Controller hand)
+    // duration : 반복횟수(시간), frequency : 빈도, amplify : 진폭, hand : 왼쪽 혹은 오른쪽 컨트롤러
+    public static void PlayVibration(float waitTime, float duration, float frequency, float amplitude, Controller hand)
     {
 #if PC
 
 #elif Oculus
-
+        if (CoroutineInstance.coroutineInstance == null)
+        {
+            GameObject coroutineObj = new GameObject("CoroutineInstance");
+            coroutineObj.AddComponent<CoroutineInstance>();
+        }
+        CoroutineInstance.coroutineInstance.StartCoroutine(VibrationCoroutine(waitTime, duration, frequency, amplitude, hand));
 #elif Vive
-        SteamVR_Action_Vibration vib = SteamVR_Actions._default.Haptic;
-        vib.Execute(0, duration, frequency, amplitude, (SteamVR_Input_Sources)hand);
+        SteamVR_Actions._default.Haptic.Execute(0, duration, frequency, amplitude, (SteamVR_Input_Sources)hand);
 #endif
+    }
+
+#if Oculus
+    static IEnumerator VibrationCoroutine(float waitTime, float duration, float frequency, float amplitude, Controller hand)
+    {
+
+        OVRInput.SetControllerVibration(frequency, amplitude, (OVRInput.Controller)hand);
+        yield return new WaitForSeconds(waitTime);
+        OVRInput.SetControllerVibration(0, 0, (OVRInput.Controller)hand);
+    }
+#endif
+
+    // 카메라가 바라보는 방향을 기준으로 센터를 잡는다.
+    public static void Recenter()
+    {
+#if Oculus
+        OVRManager.display.RecenterPose();
+#elif Vive
+        List<XRInputSubsystem> subsystems = new List<XRInputSubsystem>();
+        SubsystemManager.GetInstances<XRInputSubsystem>(subsystems);
+        for (int i = 0; i < subsystems.Count; i++)
+        {
+            subsystems[i].TrySetTrackingOriginMode(TrackingOriginModeFlags.TrackingReference);
+            subsystems[i].TryRecenter();
+        }
+
+#endif
+    }
+
+    // 원하는 방향으로 타겟의 센터를 설정
+    public static void Recenter(Transform target, Vector3 direction)
+    {
+        target.forward = target.rotation * direction;
+    }
+}
+
+class CoroutineInstance : MonoBehaviour
+{
+    public static CoroutineInstance coroutineInstance = null;
+    private void Awake()
+    {
+        if (coroutineInstance == null)
+        {
+            coroutineInstance = this;
+        }
+        DontDestroyOnLoad(gameObject);
     }
 }

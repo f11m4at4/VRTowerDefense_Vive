@@ -27,17 +27,14 @@ public class PlayerMove : MonoBehaviour
         cc = GetComponent<CharacterController>();
     }
 
-    
+    bool bRecentering = false;
+
     void Update()
     {
         // 사용자의 입력에 따라 앞뒤좌우로 이동하고 싶다.
         // 1. 사용자의 입력을 받는다.
-        //float h = Input.GetAxis("Horizontal");
-        //float v = Input.GetAxis("Vertical");
         float h = ARAVRInput.GetAxis("Horizontal");
         float v = ARAVRInput.GetAxis("Vertical");
-
-        print("h : " + h);  
         // 2. 방향을 만든다.
         Vector3 dir = new Vector3(h, 0, v);
 
@@ -48,13 +45,13 @@ public class PlayerMove : MonoBehaviour
         yVelocity += gravity * Time.deltaTime;
 
         // 2.2 바닥에 있을 경우 수직항력처리를 위해 속도를 0으로 한다.
-        if(cc.isGrounded)
+        if (cc.isGrounded)
         {
             yVelocity = 0;
         }
 
         // 2.3 사용자가 점프버튼을 누르면 속도에 점프크기를 할당한다.
-        if(ARAVRInput.GetDown(ARAVRInput.Button.Two, ARAVRInput.Controller.RTouch))
+        if (ARAVRInput.GetDown(ARAVRInput.Button.Two, ARAVRInput.Controller.RTouch))
         {
             yVelocity = jumpPower;
         }
@@ -63,5 +60,23 @@ public class PlayerMove : MonoBehaviour
 
         // 3. 이동한다.
         cc.Move(dir * speed * Time.deltaTime);
+
+        // 오른쪽 터치패드 혹은 썸스틱을 아래로 내리면 Recenter 한다.
+        float recenter = ARAVRInput.GetAxis("Vertical", ARAVRInput.Controller.RTouch);
+        if (recenter < 0)
+        {
+            if (!bRecentering)
+            {
+
+                ARAVRInput.Recenter(transform, Vector3.back);
+                //ARAVRInput.Recenter();
+            }
+            bRecentering = true;
+        }
+        else
+        {
+
+            bRecentering = false;
+        }
     }
 }
