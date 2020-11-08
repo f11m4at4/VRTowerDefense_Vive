@@ -24,7 +24,7 @@ public class CamRotate : MonoBehaviour
 
     void Update()
     {
-        if(ARAVRInput.isPC == false)
+        if(ARAVRInput.IsPC() == false)
         {
             return;
         }
