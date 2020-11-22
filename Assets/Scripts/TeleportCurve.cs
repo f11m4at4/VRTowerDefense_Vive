@@ -31,8 +31,8 @@ public class TeleportCurve : MonoBehaviour
         // 라인렌더러 컴포넌트 얻어오기
         lr = GetComponent<LineRenderer>();
         // 라인렌더러의 선 너비를 지정
-        lr.startWidth = 0.0f;
-        lr.endWidth = 0.2f;
+        lr.startWidth = 0.05f;
+        lr.endWidth = 0.1f;
         // 컴포넌트가 없을 경우 컴포넌트 추가
         if (lr == null)
         {

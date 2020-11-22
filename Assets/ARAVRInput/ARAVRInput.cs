@@ -364,6 +364,7 @@ public static class ARAVRInput
         float currentTime = 0;
         while (currentTime < duration)
         {
+            currentTime += Time.deltaTime;
             OVRInput.SetControllerVibration(frequency, amplitude, (OVRInput.Controller)hand);
             yield return null;
         }
@@ -401,6 +402,8 @@ public static class ARAVRInput
 #endif
 
     // 광선 레이가 닿는 곳에 크로스헤어를 위치시키고 싶다.
+    // crosshair : 크로스헤어 UI 트랜스폼, layerMask : 충돌 체크할 레이어
+    // isHand : Ray 생성에 컨트롤러 정보를 이용할 것인지여부
     public static void DrawCrosshair(Transform crosshair, bool isHand = true, Controller hand = Controller.RTouch)
     {
         // 1. 광선 레이 만들기
